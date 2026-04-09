@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WebP Converter</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>WebP Converter</h1>
+      <p class="subtitle">Batch convert images to WebP for the web</p>
+    </header>
+
+    <main>
+      <!-- Folder selection -->
+      <div class="section" id="folder-section">
+        <div class="folder-row">
+          <button id="btn-folder" class="btn btn-primary">Select folder</button>
+          <span id="folder-path" class="folder-path">No folder selected</span>
+        </div>
+        <div id="scan-info" class="scan-info hidden"></div>
+      </div>
+
+      <!-- Settings -->
+      <div class="section">
+        <div class="settings-grid">
+          <div class="setting">
+            <label for="quality">Quality</label>
+            <div class="slider-row">
+              <input type="range" id="quality" min="1" max="100" value="80" />
+              <span id="quality-value" class="setting-value">80</span>
+            </div>
+          </div>
+          <div class="setting">
+            <label for="max-width">Max width (px)</label>
+            <input type="number" id="max-width" value="1920" min="100" max="10000" />
+          </div>
+          <div class="setting">
+            <label class="checkbox-label">
+              <input type="checkbox" id="recursive" checked />
+              Include subfolders
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Convert button -->
+      <div class="section center">
+        <button id="btn-convert" class="btn btn-convert" disabled>Convert to WebP</button>
+      </div>
+
+      <!-- Progress -->
+      <div id="progress-section" class="section hidden">
+        <div class="progress-bar-container">
+          <div id="progress-bar" class="progress-bar"></div>
+        </div>
+        <div id="progress-text" class="progress-text"></div>
+        <div id="progress-file" class="progress-file"></div>
+      </div>
+
+      <!-- Report -->
+      <div id="report-section" class="section hidden">
+        <h2>Done!</h2>
+        <div class="report-grid">
+          <div class="report-item">
+            <span class="report-label">Converted</span>
+            <span id="report-converted" class="report-value ok">0</span>
+          </div>
+          <div class="report-item">
+            <span class="report-label">Skipped</span>
+            <span id="report-skipped" class="report-value skip">0</span>
+          </div>
+          <div class="report-item">
+            <span class="report-label">Errors</span>
+            <span id="report-errors" class="report-value err">0</span>
+          </div>
+          <div class="report-item wide">
+            <span class="report-label">Size</span>
+            <span id="report-size" class="report-value"></span>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      <a href="https://github.com/magipa-consulting/webp-converter" target="_blank">GitHub</a>
+      <span>·</span>
+      <span>MIT License</span>
+      <span>·</span>
+      <span>MAGIPA Consulting</span>
+    </footer>
+  </div>
+
+  <script src="main.js"></script>
+</body>
+</html>

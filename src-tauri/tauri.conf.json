@@ -1,0 +1,44 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nicedaycode/tauri-v2-schema/refs/heads/main/tauri.conf.json",
+  "productName": "WebP Converter",
+  "version": "1.0.0",
+  "identifier": "fr.magipa.webp-converter",
+  "build": {
+    "frontendDist": "../src",
+    "devUrl": "http://localhost:1420"
+  },
+  "app": {
+    "withGlobalTauri": true,
+    "windows": [
+      {
+        "title": "WebP Converter",
+        "width": 700,
+        "height": 560,
+        "resizable": true,
+        "minWidth": 500,
+        "minHeight": 450,
+        "center": true
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "windows": {
+      "nsis": {
+        "installMode": "currentUser"
+      }
+    }
+  },
+  "plugins": {}
+}
