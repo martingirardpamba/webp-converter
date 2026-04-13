@@ -42,11 +42,44 @@ fn convert(app: AppHandle, folder: String, recursive: bool, quality: f32, max_wi
     report
 }
 
+#[tauri::command]
+fn convert_files(app: AppHandle, files: Vec<String>, quality: f32, max_width: u32) -> ConvertReport {
+    let total = files.len();
+    let mut report = ConvertReport {
+        converted: 0,
+        skipped: 0,
+        errors: 0,
+        total_size_before: 0,
+        total_size_after: 0,
+    };
+
+    for (i, file_path) in files.iter().enumerate() {
+        let mut progress = converter::convert_image(file_path, quality, max_width);
+        progress.current = i + 1;
+        progress.total = total;
+
+        match progress.status.as_str() {
+            "ok" => {
+                report.converted += 1;
+                report.total_size_before += progress.size_before;
+                report.total_size_after += progress.size_after;
+            }
+            "skip" => report.skipped += 1,
+            _ => report.errors += 1,
+        }
+
+        let _ = app.emit("convert-progress", &progress);
+    }
+
+    let _ = app.emit("convert-done", &report);
+    report
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
-        .invoke_handler(tauri::generate_handler![scan_folder, convert])
+        .invoke_handler(tauri::generate_handler![scan_folder, convert, convert_files])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

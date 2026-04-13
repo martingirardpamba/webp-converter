@@ -4,6 +4,7 @@ const { open } = window.__TAURI__.dialog;
 
 // DOM elements
 const btnFolder = document.getElementById("btn-folder");
+const btnFiles = document.getElementById("btn-files");
 const folderPath = document.getElementById("folder-path");
 const scanInfo = document.getElementById("scan-info");
 const quality = document.getElementById("quality");
@@ -18,6 +19,8 @@ const progressFile = document.getElementById("progress-file");
 const reportSection = document.getElementById("report-section");
 
 let selectedFolder = null;
+let selectedFiles = null; // array of file paths
+let mode = null; // "folder" or "files"
 
 function humanSize(bytes) {
   if (bytes >= 1073741824) return (bytes / 1073741824).toFixed(1) + " GB";
@@ -36,9 +39,12 @@ btnFolder.addEventListener("click", async () => {
   const folder = await open({ directory: true, multiple: false });
   if (!folder) return;
 
+  mode = "folder";
   selectedFolder = folder;
+  selectedFiles = null;
   folderPath.textContent = folder;
   folderPath.classList.add("active");
+  recursive.parentElement.classList.remove("hidden");
 
   // Scan
   const scan = await invoke("scan_folder", {
@@ -58,7 +64,34 @@ btnFolder.addEventListener("click", async () => {
     btnConvert.disabled = false;
   }
 
-  // Reset previous results
+  reportSection.classList.add("hidden");
+  progressSection.classList.add("hidden");
+});
+
+// File selection
+btnFiles.addEventListener("click", async () => {
+  const files = await open({
+    directory: false,
+    multiple: true,
+    filters: [{
+      name: "Images",
+      extensions: ["jpg", "jpeg", "png", "gif", "bmp", "tiff", "tif"]
+    }]
+  });
+  if (!files || files.length === 0) return;
+
+  mode = "files";
+  selectedFiles = Array.isArray(files) ? files : [files];
+  selectedFolder = null;
+  recursive.parentElement.classList.add("hidden");
+
+  const plural = selectedFiles.length > 1 ? "s" : "";
+  folderPath.textContent = `${selectedFiles.length} image${plural} selected`;
+  folderPath.classList.add("active");
+  scanInfo.textContent = selectedFiles.map(f => f.split("\\").pop().split("/").pop()).join(", ");
+  scanInfo.classList.remove("hidden");
+  btnConvert.disabled = false;
+
   reportSection.classList.add("hidden");
   progressSection.classList.add("hidden");
 });
@@ -83,26 +116,36 @@ recursive.addEventListener("change", async () => {
 
 // Convert
 btnConvert.addEventListener("click", async () => {
-  if (!selectedFolder) return;
+  if (!mode) return;
 
   btnConvert.disabled = true;
   btnFolder.disabled = true;
+  btnFiles.disabled = true;
   reportSection.classList.add("hidden");
   progressSection.classList.remove("hidden");
   progressBar.style.width = "0%";
   progressText.textContent = "Starting...";
   progressFile.textContent = "";
 
-  const report = await invoke("convert", {
-    folder: selectedFolder,
-    recursive: recursive.checked,
-    quality: parseFloat(quality.value),
-    maxWidth: parseInt(maxWidth.value),
-  });
+  let report;
+  if (mode === "folder") {
+    report = await invoke("convert", {
+      folder: selectedFolder,
+      recursive: recursive.checked,
+      quality: parseFloat(quality.value),
+      maxWidth: parseInt(maxWidth.value),
+    });
+  } else {
+    report = await invoke("convert_files", {
+      files: selectedFiles,
+      quality: parseFloat(quality.value),
+      maxWidth: parseInt(maxWidth.value),
+    });
+  }
 
-  // Show report
   showReport(report);
   btnFolder.disabled = false;
+  btnFiles.disabled = false;
 });
 
 // Progress events
