@@ -1,6 +1,6 @@
 [package]
 name = "webp-converter"
-version = "1.0.0"
+version = "1.0.1"
 description = "Batch convert images to WebP for the web"
 authors = ["MAGIPA Consulting"]
 edition = "2021"
