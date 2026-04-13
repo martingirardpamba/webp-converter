@@ -33,6 +33,7 @@ pub struct ConvertReport {
     pub errors: usize,
     pub total_size_before: u64,
     pub total_size_after: u64,
+    pub first_output_dir: Option<String>,
 }
 
 fn is_image_file(path: &Path) -> bool {
@@ -185,11 +186,17 @@ pub fn convert_image(
         img
     };
 
-    // Encode to WebP
-    let rgba = img.to_rgba8();
-    let (w, h) = (rgba.width(), rgba.height());
-    let encoder = webp::Encoder::from_rgba(rgba.as_raw(), w, h);
-    let webp_data = encoder.encode(quality);
+    // Encode to WebP — use RGB for opaque images (much better compression),
+    // RGBA only when the source actually has an alpha channel.
+    let webp_data = if img.color().has_alpha() {
+        let rgba = img.to_rgba8();
+        let (w, h) = (rgba.width(), rgba.height());
+        webp::Encoder::from_rgba(rgba.as_raw(), w, h).encode(quality)
+    } else {
+        let rgb = img.to_rgb8();
+        let (w, h) = (rgb.width(), rgb.height());
+        webp::Encoder::from_rgb(rgb.as_raw(), w, h).encode(quality)
+    };
 
     // Write file
     if let Err(e) = fs::write(&dest, &*webp_data) {

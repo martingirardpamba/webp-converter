@@ -1,5 +1,7 @@
 mod converter;
 
+use std::path::Path;
+
 use converter::{ConvertProgress, ConvertReport, ScanResult};
 use tauri::{AppHandle, Emitter};
 
@@ -18,6 +20,7 @@ fn convert(app: AppHandle, folder: String, recursive: bool, quality: f32, max_wi
         errors: 0,
         total_size_before: 0,
         total_size_after: 0,
+        first_output_dir: None,
     };
 
     for (i, file_path) in scan.files.iter().enumerate() {
@@ -30,6 +33,9 @@ fn convert(app: AppHandle, folder: String, recursive: bool, quality: f32, max_wi
                 report.converted += 1;
                 report.total_size_before += progress.size_before;
                 report.total_size_after += progress.size_after;
+                if report.first_output_dir.is_none() {
+                    report.first_output_dir = webp_dir_for(file_path);
+                }
             }
             "skip" => report.skipped += 1,
             _ => report.errors += 1,
@@ -51,6 +57,7 @@ fn convert_files(app: AppHandle, files: Vec<String>, quality: f32, max_width: u3
         errors: 0,
         total_size_before: 0,
         total_size_after: 0,
+        first_output_dir: None,
     };
 
     for (i, file_path) in files.iter().enumerate() {
@@ -63,6 +70,9 @@ fn convert_files(app: AppHandle, files: Vec<String>, quality: f32, max_width: u3
                 report.converted += 1;
                 report.total_size_before += progress.size_before;
                 report.total_size_after += progress.size_after;
+                if report.first_output_dir.is_none() {
+                    report.first_output_dir = webp_dir_for(file_path);
+                }
             }
             "skip" => report.skipped += 1,
             _ => report.errors += 1,
@@ -75,11 +85,29 @@ fn convert_files(app: AppHandle, files: Vec<String>, quality: f32, max_width: u3
     report
 }
 
+fn webp_dir_for(file_path: &str) -> Option<String> {
+    Path::new(file_path)
+        .parent()
+        .map(|p| p.join("webp").to_string_lossy().to_string())
+}
+
+#[tauri::command]
+fn open_path(path: String) -> Result<(), String> {
+    #[cfg(target_os = "windows")]
+    let result = std::process::Command::new("explorer").arg(&path).spawn();
+    #[cfg(target_os = "macos")]
+    let result = std::process::Command::new("open").arg(&path).spawn();
+    #[cfg(target_os = "linux")]
+    let result = std::process::Command::new("xdg-open").arg(&path).spawn();
+
+    result.map(|_| ()).map_err(|e| e.to_string())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
-        .invoke_handler(tauri::generate_handler![scan_folder, convert, convert_files])
+        .invoke_handler(tauri::generate_handler![scan_folder, convert, convert_files, open_path])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

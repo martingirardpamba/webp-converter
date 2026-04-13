@@ -17,6 +17,7 @@ const progressBar = document.getElementById("progress-bar");
 const progressText = document.getElementById("progress-text");
 const progressFile = document.getElementById("progress-file");
 const reportSection = document.getElementById("report-section");
+const btnOpenFolder = document.getElementById("btn-open-folder");
 
 let selectedFolder = null;
 let selectedFiles = null; // array of file paths
@@ -121,6 +122,7 @@ btnConvert.addEventListener("click", async () => {
   btnConvert.disabled = true;
   btnFolder.disabled = true;
   btnFiles.disabled = true;
+  btnOpenFolder.classList.add("hidden");
   reportSection.classList.add("hidden");
   progressSection.classList.remove("hidden");
   progressBar.style.width = "0%";
@@ -182,7 +184,13 @@ function showReport(report) {
     document.getElementById("report-size").textContent = "—";
   }
 
-  // Re-scan to update count
+  if (report.first_output_dir) {
+    btnOpenFolder.classList.remove("hidden");
+    btnOpenFolder.onclick = () => invoke("open_path", { path: report.first_output_dir });
+  } else {
+    btnOpenFolder.classList.add("hidden");
+  }
+
   scanInfo.textContent = "All images converted.";
   btnConvert.disabled = true;
 }
