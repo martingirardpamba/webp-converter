@@ -8,7 +8,7 @@ Convert all your images to WebP in one click. Drop a folder, hit convert, done.
 
 ## Download
 
-**[Download for Windows (2 MB)](https://github.com/magipa-consulting/webp-converter/releases/latest)**
+**[Download for Windows (2 MB)](https://github.com/martingirardpamba/webp-converter/releases/latest)**
 
 Download the `.exe` installer, run it, that's it.
 
@@ -37,7 +37,7 @@ WebP images are **50-90% smaller** than JPG/PNG with similar quality. Your websi
 Requires [Rust](https://rustup.rs) and [Node.js](https://nodejs.org).
 
 ```
-git clone https://github.com/magipa-consulting/webp-converter.git
+git clone https://github.com/martingirardpamba/webp-converter.git
 cd webp-converter
 npm install
 npx tauri build
