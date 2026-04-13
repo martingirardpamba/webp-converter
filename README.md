@@ -4,8 +4,6 @@ Convert all your images to WebP in one click. Drop a folder, hit convert, done.
 
 **2 MB installer. No dependencies. No command line.**
 
-![WebP Converter screenshot](screenshot.png)
-
 ## Download
 
 **[Download for Windows (2 MB)](https://github.com/martingirardpamba/webp-converter/releases/latest)**
