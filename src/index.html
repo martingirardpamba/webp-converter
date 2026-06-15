@@ -10,22 +10,31 @@
   <div class="app">
     <header>
       <h1>WebP Converter</h1>
-      <p class="subtitle">Batch convert images to WebP for the web</p>
+      <p class="subtitle">Batch convert images &amp; videos for the web</p>
     </header>
 
+    <div class="tabs">
+      <button class="tab active" id="tab-image" data-tab="image">Images (WebP)</button>
+      <button class="tab" id="tab-video" data-tab="video">Vidéos (Web)</button>
+    </div>
+
     <main>
-      <!-- Folder selection -->
+      <!-- Selection (shared) -->
       <div class="section" id="folder-section">
         <div class="folder-row">
           <button id="btn-folder" class="btn btn-primary">Select folder</button>
-          <button id="btn-files" class="btn btn-primary">Select images</button>
+          <button id="btn-files" class="btn btn-primary">Select files</button>
           <span id="folder-path" class="folder-path">No selection</span>
         </div>
+        <label class="checkbox-label" id="recursive-row">
+          <input type="checkbox" id="recursive" checked />
+          Include subfolders
+        </label>
         <div id="scan-info" class="scan-info hidden"></div>
       </div>
 
-      <!-- Settings -->
-      <div class="section">
+      <!-- Image settings -->
+      <div class="section settings-panel" id="image-settings">
         <div class="settings-grid">
           <div class="setting">
             <label for="quality">Quality</label>
@@ -38,16 +47,41 @@
             <label for="max-width">Max width (px)</label>
             <input type="number" id="max-width" value="1920" min="100" max="10000" />
           </div>
-          <div class="setting">
-            <label class="checkbox-label">
-              <input type="checkbox" id="recursive" checked />
-              Include subfolders
-            </label>
-          </div>
         </div>
       </div>
 
-      <!-- Convert button -->
+      <!-- Video settings -->
+      <div class="section settings-panel hidden" id="video-settings">
+        <div class="settings-grid">
+          <div class="setting">
+            <label for="video-format">Format</label>
+            <select id="video-format">
+              <option value="mp4" selected>MP4 (H.264) — compatible partout</option>
+              <option value="webm">WebM (VP9) — plus léger</option>
+            </select>
+          </div>
+          <div class="setting">
+            <label for="video-quality">Quality</label>
+            <div class="slider-row">
+              <input type="range" id="video-quality" min="1" max="100" value="80" />
+              <span id="video-quality-value" class="setting-value">80</span>
+            </div>
+          </div>
+          <div class="setting">
+            <label for="max-height">Max height (px)</label>
+            <input type="number" id="max-height" value="1080" min="120" max="4320" />
+          </div>
+          <div class="setting">
+            <label class="checkbox-label">
+              <input type="checkbox" id="silent" />
+              Silencieux (retirer l'audio)
+            </label>
+          </div>
+        </div>
+        <p class="hint">WebM/VP9 : ~30 % plus léger, mais encodage plus lent que MP4.</p>
+      </div>
+
+      <!-- Convert -->
       <div class="section center">
         <button id="btn-convert" class="btn btn-convert" disabled>Convert to WebP</button>
       </div>
@@ -59,6 +93,9 @@
         </div>
         <div id="progress-text" class="progress-text"></div>
         <div id="progress-file" class="progress-file"></div>
+        <div class="center">
+          <button id="btn-cancel" class="btn btn-cancel hidden">Annuler</button>
+        </div>
       </div>
 
       <!-- Report -->
@@ -83,7 +120,7 @@
           </div>
         </div>
         <div class="center" style="margin-top: 1rem;">
-          <button id="btn-open-folder" class="btn btn-primary hidden">Open webp folder</button>
+          <button id="btn-open-folder" class="btn btn-primary hidden">Open output folder</button>
         </div>
       </div>
     </main>
