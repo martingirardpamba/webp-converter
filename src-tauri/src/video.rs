@@ -6,6 +6,7 @@ pub const VIDEO_EXTENSIONS: &[&str] = &[
     "mp4", "mov", "avi", "mkv", "webm", "m4v", "flv", "wmv", "mpg", "mpeg", "m2ts", "3gp",
 ];
 pub const VIDEO_OUTPUT_DIR: &str = "web";
+const AUDIO_BITRATE: &str = "128k";
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "lowercase")]
@@ -173,10 +174,10 @@ pub fn build_ffmpeg_args(
     } else {
         match format {
             VideoFormat::Mp4 => args.extend([
-                "-c:a".into(), "aac".into(), "-b:a".into(), "128k".into(),
+                "-c:a".into(), "aac".into(), "-b:a".into(), AUDIO_BITRATE.into(),
             ]),
             VideoFormat::Webm => args.extend([
-                "-c:a".into(), "libopus".into(), "-b:a".into(), "128k".into(),
+                "-c:a".into(), "libopus".into(), "-b:a".into(), AUDIO_BITRATE.into(),
             ]),
         }
     }
@@ -198,7 +199,15 @@ pub fn scan_videos(folder: &str, recursive: bool, format: VideoFormat) -> VideoS
     if recursive {
         for entry in WalkDir::new(folder).into_iter().filter_map(|e| e.ok()) {
             let path = entry.path();
-            if path.components().any(|c| c.as_os_str() == VIDEO_OUTPUT_DIR) {
+            // Skip our own output files: those whose IMMEDIATE parent is the output
+            // dir. Don't skip by any ancestor named "web" — it's a common folder name
+            // and that would silently drop the user's videos.
+            if path
+                .parent()
+                .and_then(|p| p.file_name())
+                .map(|n| n == VIDEO_OUTPUT_DIR)
+                .unwrap_or(false)
+            {
                 continue;
             }
             if path.is_file() && is_video_file(path) {
@@ -367,5 +376,34 @@ mod tests {
             .collect();
         assert_eq!(names, vec!["b.mov"]);
         assert_eq!(res.total_size, 2);
+    }
+
+    #[test]
+    fn scan_recursive_finds_nested_and_skips_output() {
+        let tmp = tempfile::tempdir().unwrap();
+        let root = tmp.path();
+        let sub = root.join("sub");
+        std::fs::create_dir_all(&sub).unwrap();
+        std::fs::write(root.join("top.mp4"), b"xxx").unwrap();
+        std::fs::write(sub.join("deep.mov"), b"yy").unwrap();
+        // An existing output (parent is "web") must be ignored.
+        std::fs::create_dir_all(root.join("web")).unwrap();
+        std::fs::write(root.join("web").join("already.mp4"), b"done").unwrap();
+
+        let res = scan_videos(root.to_str().unwrap(), true, VideoFormat::Mp4);
+        let mut names: Vec<String> = res
+            .files
+            .iter()
+            .map(|f| Path::new(f).file_name().unwrap().to_string_lossy().to_string())
+            .collect();
+        names.sort();
+        assert_eq!(names, vec!["deep.mov", "top.mp4"]);
+    }
+
+    #[test]
+    fn unknown_format_string_defaults_to_mp4() {
+        assert_eq!(VideoFormat::from_str_lenient("garbage"), VideoFormat::Mp4);
+        assert_eq!(VideoFormat::from_str_lenient(""), VideoFormat::Mp4);
+        assert_eq!(VideoFormat::from_str_lenient("WEBM"), VideoFormat::Webm);
     }
 }
