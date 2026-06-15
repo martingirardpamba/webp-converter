@@ -207,7 +207,7 @@ btnConvert.addEventListener("click", async () => {
     } else {
       btnCancel.classList.remove("hidden");
       btnCancel.disabled = false;
-      btnCancel.textContent = "Annuler";
+      btnCancel.textContent = "Cancel";
       report = await invoke("convert_videos", {
         files: selectedFiles,
         format: videoFormat.value,
@@ -220,7 +220,7 @@ btnConvert.addEventListener("click", async () => {
   } catch (e) {
     progressSection.classList.add("hidden");
     scanInfo.classList.remove("hidden");
-    scanInfo.textContent = "Erreur: " + (e && e.message ? e.message : e);
+    scanInfo.textContent = "Error: " + (e && e.message ? e.message : e);
   } finally {
     btnFolder.disabled = false;
     btnFiles.disabled = false;
@@ -233,7 +233,7 @@ btnConvert.addEventListener("click", async () => {
 // Cancel (video only)
 btnCancel.addEventListener("click", async () => {
   btnCancel.disabled = true;
-  btnCancel.textContent = "Annulation...";
+  btnCancel.textContent = "Cancelling...";
   try {
     await invoke("cancel_video");
   } catch (e) {
@@ -263,22 +263,22 @@ listen("video-progress", (event) => {
   progressBar.style.width = overall + "%";
 
   if (p.status === "encoding") {
-    progressText.textContent = `Fichier ${p.current} / ${p.total} — ${p.file_percent}% (global ${overall}%)`;
+    progressText.textContent = `File ${p.current} / ${p.total} — ${p.file_percent}% (overall ${overall}%)`;
     progressFile.textContent = p.file_name;
   } else if (p.status === "ok") {
-    progressText.textContent = `Fichier ${p.current} / ${p.total} — terminé`;
+    progressText.textContent = `File ${p.current} / ${p.total} — done`;
     const gain = p.size_before > 0 ? Math.round((1 - p.size_after / p.size_before) * 100) : 0;
     progressFile.textContent = `${p.file_name} — ${humanSize(p.size_before)} → ${humanSize(p.size_after)} (−${gain}%)`;
   } else if (p.status === "skip") {
-    progressFile.textContent = `${p.file_name} — déjà converti`;
+    progressFile.textContent = `${p.file_name} — already converted`;
   } else if (p.status === "error") {
-    progressFile.textContent = `${p.file_name} — erreur: ${p.error_message || "unknown"}`;
+    progressFile.textContent = `${p.file_name} — error: ${p.error_message || "unknown"}`;
   }
 });
 
 listen("video-done", () => {
   btnCancel.disabled = false;
-  btnCancel.textContent = "Annuler";
+  btnCancel.textContent = "Cancel";
 });
 
 function showReport(report) {
@@ -305,8 +305,8 @@ function showReport(report) {
     btnOpenFolder.classList.add("hidden");
   }
 
-  const tail = report.cancelled ? " (annulé)" : "";
-  scanInfo.textContent = (currentTab === "image" ? "All images converted." : "Conversion vidéo terminée.") + tail;
+  const tail = report.cancelled ? " (cancelled)" : "";
+  scanInfo.textContent = (currentTab === "image" ? "All images converted." : "Video conversion done.") + tail;
   btnConvert.disabled = true;
 }
 

@@ -15,7 +15,7 @@
 
     <div class="tabs">
       <button class="tab active" id="tab-image" data-tab="image">Images (WebP)</button>
-      <button class="tab" id="tab-video" data-tab="video">Vidéos (Web)</button>
+      <button class="tab" id="tab-video" data-tab="video">Videos (Web)</button>
     </div>
 
     <main>
@@ -56,8 +56,8 @@
           <div class="setting">
             <label for="video-format">Format</label>
             <select id="video-format">
-              <option value="mp4" selected>MP4 (H.264) — compatible partout</option>
-              <option value="webm">WebM (VP9) — plus léger</option>
+              <option value="mp4" selected>MP4 (H.264) — compatible everywhere</option>
+              <option value="webm">WebM (VP9) — smaller</option>
             </select>
           </div>
           <div class="setting">
@@ -74,11 +74,11 @@
           <div class="setting">
             <label class="checkbox-label">
               <input type="checkbox" id="silent" />
-              Silencieux (retirer l'audio)
+              Silent (remove audio)
             </label>
           </div>
         </div>
-        <p class="hint">WebM/VP9 : ~30 % plus léger, mais encodage plus lent que MP4.</p>
+        <p class="hint">WebM/VP9: ~30% smaller, but slower to encode than MP4.</p>
       </div>
 
       <!-- Convert -->
@@ -94,7 +94,7 @@
         <div id="progress-text" class="progress-text"></div>
         <div id="progress-file" class="progress-file"></div>
         <div class="center">
-          <button id="btn-cancel" class="btn btn-cancel hidden">Annuler</button>
+          <button id="btn-cancel" class="btn btn-cancel hidden">Cancel</button>
         </div>
       </div>
 
