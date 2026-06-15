@@ -1,4 +1,5 @@
 mod converter;
+pub mod video;
 
 use std::path::Path;
 
