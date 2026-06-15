@@ -186,42 +186,48 @@ btnConvert.addEventListener("click", async () => {
   progressText.textContent = "Starting...";
   progressFile.textContent = "";
 
-  let report;
-  if (currentTab === "image") {
-    btnCancel.classList.add("hidden");
-    if (mode === "folder") {
-      report = await invoke("convert", {
-        folder: selectedFolder,
-        recursive: recursive.checked,
-        quality: parseFloat(quality.value),
-        maxWidth: parseInt(maxWidth.value),
-      });
+  try {
+    let report;
+    if (currentTab === "image") {
+      btnCancel.classList.add("hidden");
+      if (mode === "folder") {
+        report = await invoke("convert", {
+          folder: selectedFolder,
+          recursive: recursive.checked,
+          quality: parseFloat(quality.value),
+          maxWidth: parseInt(maxWidth.value),
+        });
+      } else {
+        report = await invoke("convert_files", {
+          files: selectedFiles,
+          quality: parseFloat(quality.value),
+          maxWidth: parseInt(maxWidth.value),
+        });
+      }
     } else {
-      report = await invoke("convert_files", {
+      btnCancel.classList.remove("hidden");
+      btnCancel.disabled = false;
+      btnCancel.textContent = "Annuler";
+      report = await invoke("convert_videos", {
         files: selectedFiles,
-        quality: parseFloat(quality.value),
-        maxWidth: parseInt(maxWidth.value),
+        format: videoFormat.value,
+        quality: parseInt(videoQuality.value),
+        maxHeight: parseInt(maxHeight.value),
+        silent: silent.checked,
       });
     }
-  } else {
-    btnCancel.classList.remove("hidden");
-    btnCancel.disabled = false;
-    btnCancel.textContent = "Annuler";
-    report = await invoke("convert_videos", {
-      files: selectedFiles,
-      format: videoFormat.value,
-      quality: parseInt(videoQuality.value),
-      maxHeight: parseInt(maxHeight.value),
-      silent: silent.checked,
-    });
+    showReport(report);
+  } catch (e) {
+    progressSection.classList.add("hidden");
+    scanInfo.classList.remove("hidden");
+    scanInfo.textContent = "Erreur: " + (e && e.message ? e.message : e);
+  } finally {
+    btnFolder.disabled = false;
+    btnFiles.disabled = false;
+    tabImage.disabled = false;
+    tabVideo.disabled = false;
+    btnCancel.classList.add("hidden");
   }
-
-  showReport(report);
-  btnFolder.disabled = false;
-  btnFiles.disabled = false;
-  tabImage.disabled = false;
-  tabVideo.disabled = false;
-  btnCancel.classList.add("hidden");
 });
 
 // Cancel (video only)
