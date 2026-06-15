@@ -4,7 +4,7 @@ pub mod video;
 use std::path::Path;
 use std::sync::Mutex;
 
-use converter::{ConvertProgress, ConvertReport, ScanResult};
+use converter::{ConvertReport, ScanResult};
 use tauri::{AppHandle, Emitter, State};
 use tauri_plugin_shell::process::{CommandChild, CommandEvent};
 use tauri_plugin_shell::ShellExt;
@@ -230,6 +230,14 @@ async fn convert_videos(
                 continue;
             }
         };
+        // Cancel may have arrived while we were preparing this file — kill the
+        // freshly spawned child instead of letting it run to completion.
+        let is_cancelled = *state.cancelled.lock().unwrap();
+        if is_cancelled {
+            let _ = child.kill();
+            report.cancelled = true;
+            break;
+        }
         *state.child.lock().unwrap() = Some(child);
 
         let _ = app.emit("video-progress", &VideoProgress {
