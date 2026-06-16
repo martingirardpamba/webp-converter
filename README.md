@@ -4,8 +4,6 @@ Convert images to WebP and heavy videos to web-light MP4/WebM in one click. Drop
 
 **No command line. The image converter stays tiny; video conversion bundles FFmpeg.**
 
-![WebP Converter screenshot](screenshot.png)
-
 ## Download
 
 **[Download for Windows](https://github.com/martingirardpamba/webp-converter/releases/latest)**
