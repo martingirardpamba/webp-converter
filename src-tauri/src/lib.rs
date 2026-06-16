@@ -16,6 +16,13 @@ struct VideoState {
     cancelled: Mutex<bool>,
 }
 
+/// Locks a mutex, recovering the guard even if a previous holder panicked
+/// (poisoning). The critical sections here are tiny and panic-free, so this is
+/// purely defensive: a stray panic can never wedge cancellation.
+fn lock<T>(m: &Mutex<T>) -> std::sync::MutexGuard<'_, T> {
+    m.lock().unwrap_or_else(|poisoned| poisoned.into_inner())
+}
+
 #[tauri::command]
 fn scan_folder(folder: String, recursive: bool) -> ScanResult {
     converter::scan_folder(&folder, recursive)
@@ -121,8 +128,8 @@ fn scan_videos(folder: String, recursive: bool, format: String) -> VideoScanResu
 
 #[tauri::command]
 fn cancel_video(state: State<'_, VideoState>) -> Result<(), String> {
-    *state.cancelled.lock().unwrap() = true;
-    let child = state.child.lock().unwrap().take();
+    *lock(&state.cancelled) = true;
+    let child = lock(&state.child).take();
     if let Some(child) = child {
         child.kill().map_err(|e| e.to_string())?;
     }
@@ -140,7 +147,7 @@ async fn convert_videos(
     silent: bool,
 ) -> Result<VideoReport, String> {
     let fmt = VideoFormat::from_str_lenient(&format);
-    *state.cancelled.lock().unwrap() = false;
+    *lock(&state.cancelled) = false;
 
     let total = files.len();
     let mut report = VideoReport {
@@ -154,7 +161,7 @@ async fn convert_videos(
     };
 
     for (i, input) in files.iter().enumerate() {
-        let is_cancelled = *state.cancelled.lock().unwrap();
+        let is_cancelled = *lock(&state.cancelled);
         if is_cancelled {
             report.cancelled = true;
             break;
@@ -232,13 +239,13 @@ async fn convert_videos(
         };
         // Cancel may have arrived while we were preparing this file — kill the
         // freshly spawned child instead of letting it run to completion.
-        let is_cancelled = *state.cancelled.lock().unwrap();
+        let is_cancelled = *lock(&state.cancelled);
         if is_cancelled {
             let _ = child.kill();
             report.cancelled = true;
             break;
         }
-        *state.child.lock().unwrap() = Some(child);
+        *lock(&state.child) = Some(child);
 
         let _ = app.emit("video-progress", &VideoProgress {
             current: i + 1, total, file_name: file_name.clone(), file_percent: 0,
@@ -286,9 +293,9 @@ async fn convert_videos(
                 _ => {}
             }
         }
-        *state.child.lock().unwrap() = None;
+        *lock(&state.child) = None;
 
-        let is_cancelled = *state.cancelled.lock().unwrap();
+        let is_cancelled = *lock(&state.cancelled);
         if is_cancelled {
             let _ = std::fs::remove_file(&dest);
             report.cancelled = true;

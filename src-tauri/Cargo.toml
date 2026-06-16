@@ -1,6 +1,6 @@
 [package]
 name = "webp-converter"
-version = "1.1.0"
+version = "1.1.1"
 description = "Batch convert images to WebP and videos to web-light MP4/WebM"
 authors = ["MAGIPA Consulting"]
 edition = "2021"
