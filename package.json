@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "setup": "powershell -ExecutionPolicy Bypass -File scripts/fetch-ffmpeg.ps1",
+    "release": "npm run setup && tauri build",
+    "install-app": "powershell -ExecutionPolicy Bypass -File scripts/build-and-install.ps1"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2"
