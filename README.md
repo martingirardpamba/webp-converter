@@ -8,9 +8,9 @@ Convert images to WebP and heavy videos to web-light MP4/WebM in one click. Drop
 
 ## Download
 
-**[Download for Windows (2 MB)](https://github.com/martingirardpamba/webp-converter/releases/latest)**
+**[Download for Windows](https://github.com/martingirardpamba/webp-converter/releases/latest)**
 
-Download the `.exe` installer, run it, that's it.
+Download the `.exe` installer, run it, that's it. (The installer bundles FFmpeg for video conversion.)
 
 ## What it does
 
@@ -39,15 +39,27 @@ WebP images are **50-90% smaller** than JPG/PNG with similar quality. Your websi
 | Format | MP4 (H.264) | MP4 = compatible everywhere; WebM (VP9) = ~30% lighter, slower. |
 | Quality | 80 | Maps to CRF (constant quality). Higher = better/larger. |
 | Max height | 1080px | Videos taller than this get scaled down (no upscale). |
-| Silencieux | Off | Removes the audio track (useful for background loops). |
+| Silent | Off | Removes the audio track (useful for background loops). |
 | Subfolders | On | Process videos in all subfolders too. |
 
 ## Build from source
 
 Requires [Rust](https://rustup.rs), [Node.js](https://nodejs.org), and PowerShell (Windows) or Bash (macOS/Linux).
 
+### Quick install (Windows) — one command
+
 ```
-git clone https://github.com/magipa-consulting/webp-converter.git
+git clone https://github.com/martingirardpamba/webp-converter.git
+cd webp-converter
+npm run install-app
+```
+
+`npm run install-app` fetches FFmpeg, builds the app and installer, installs it silently, and creates a Desktop shortcut. Relaunch any time from the Desktop — it stays the version you last built.
+
+### Manual build
+
+```
+git clone https://github.com/martingirardpamba/webp-converter.git
 cd webp-converter
 npm install
 
@@ -55,7 +67,7 @@ npm install
 pwsh -File scripts/fetch-ffmpeg.ps1        # Windows
 # or: ./scripts/fetch-ffmpeg.sh            # macOS / Linux
 
-npx tauri build
+npx tauri build         # or: npm run release
 ```
 
 Installer will be in `src-tauri/target/release/bundle/`.
